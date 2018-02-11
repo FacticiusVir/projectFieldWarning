@@ -21,6 +21,11 @@ namespace Assets.Controls
         public static KeyCode HOLDFIRE = KeyCode.Z;
         public static KeyCode UNLOAD = KeyCode.U;
         public static KeyCode LOAD_UP = KeyCode.Y;
+        public static KeyCode SPLIT = KeyCode.C;    //Split a group of units.
+
+        public void initControls() {
+
+        }
 
     }
 }
