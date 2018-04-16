@@ -19,6 +19,10 @@ namespace FieldWarning
             public ShaderModule VertexShader;
             public ShaderModule FragmentShader;
             public PipelineLayout PipelineLayout;
+            public DescriptorPool DescriptorPool;
+            public DescriptorSetLayout DescriptorSetLayout;
+            public DescriptorSet DescriptorSet;
+            public VulkanBuffer StateBuffer;
 
             public Device Device { get; set; }
 
@@ -29,7 +33,21 @@ namespace FieldWarning
                 this.FragmentShader?.Dispose();
 
                 this.VertexShader?.Dispose();
+
+                this.DescriptorSetLayout?.Dispose();
+
+                this.DescriptorPool?.Dispose();
+
+                this.StateBuffer?.Release();
             }
+        }
+
+        private struct UniformState
+        {
+            public mat4 World;
+            public mat4 View;
+            public mat4 Projection;
+            public mat4 InverseTransposeWorldView;
         }
 
         public IMeshHandle Mesh { get; set; }
@@ -37,10 +55,12 @@ namespace FieldWarning
         public override IRenderStageState Initialise(Device device, VulkanBufferManager bufferManager)
         {
             var vertexShader = device.CreateVertexModule(shanq => from input in shanq.GetInput<Vertex>()
+                                                                  from ubo in shanq.GetBinding<UniformState>(0)
+                                                                  let transform = ubo.Projection * ubo.View * ubo.World
                                                                   select new VertexOutput
                                                                   {
                                                                       Normal = input.Normal,
-                                                                      Position = new vec4(input.Position, 1)
+                                                                      Position = transform * new vec4(input.Position, 1)
                                                                   });
 
             var fragmentShader = device.CreateFragmentModule(shanq => from input in shanq.GetInput<FragmentInput>()
@@ -49,7 +69,30 @@ namespace FieldWarning
                                                                           Colour = new vec4(input.Normal, 1)
                                                                       });
 
-            var pipelineLayout = device.CreatePipelineLayout(null, null);
+            var stateBuffer = bufferManager.CreateBuffer<UniformState>(1, BufferUsageFlags.TransferDestination | BufferUsageFlags.UniformBuffer, MemoryPropertyFlags.DeviceLocal);
+
+            this.UpdateState(stateBuffer);
+
+            var descriptorPool = device.CreateDescriptorPool(1, new DescriptorPoolSize(DescriptorType.UniformBuffer, 1));
+
+            var descriptorSetLayout = device.CreateDescriptorSetLayout(new DescriptorSetLayoutBinding
+            {
+                Binding = 0,
+                DescriptorCount = 1,
+                DescriptorType = DescriptorType.UniformBuffer,
+                StageFlags = ShaderStageFlags.AllGraphics
+            });
+
+            var descriptorSet = device.AllocateDescriptorSet(descriptorPool, descriptorSetLayout);
+
+            descriptorSet.WriteDescriptorSet(0, 0, DescriptorType.UniformBuffer, new DescriptorBufferInfo
+            {
+                Buffer = stateBuffer.Buffer,
+                Offset = 0,
+                Range = Constants.WholeSize
+            });
+
+            var pipelineLayout = device.CreatePipelineLayout(descriptorSetLayout, null);
 
             return new StageState
             {
@@ -57,8 +100,35 @@ namespace FieldWarning
                 PipelineLayout = pipelineLayout,
                 FragmentShader = fragmentShader,
                 VertexShader = vertexShader,
+                DescriptorPool = descriptorPool,
+                DescriptorSetLayout = descriptorSetLayout,
+                DescriptorSet = descriptorSet,
+                StateBuffer = stateBuffer,
                 Mesh = this.Mesh
             };
+        }
+
+        public override void Update(IRenderStageState state)
+        {
+            this.UpdateState(((StageState)state).StateBuffer);
+        }
+
+        private void UpdateState(VulkanBuffer stateBuffer)
+        {
+            float rotation = (float)(DateTime.UtcNow.Millisecond + DateTime.UtcNow.Second * 1000);
+
+            rotation /= 1000f;
+
+            var uniformState = new UniformState
+            {
+                World = mat4.Rotate(rotation, vec3.UnitY),// * mat4.RotateZ(rotation / 4),
+                View = mat4.LookAt(new vec3(0, 5, -10), vec3.Zero, vec3.UnitY),
+                Projection = mat4.Perspective((float)Math.PI / 4f, 1.25f, 0.1f, 100)
+            };
+
+            uniformState.Projection[1, 1] *= -1;
+
+            stateBuffer.Update(uniformState);
         }
 
         public override bool IsValid(IRenderStageState state)
@@ -149,6 +219,8 @@ namespace FieldWarning
                                                                         MaxDepthBounds = 1,
                                                                         StencilTestEnable = false
                                                                     });
+
+            commandBuffer.BindDescriptorSets(PipelineBindPoint.Graphics, stageState.PipelineLayout, 0, stageState.DescriptorSet, null);
 
             commandBuffer.BindPipeline(PipelineBindPoint.Graphics, pipeline);
 
