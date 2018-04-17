@@ -59,7 +59,7 @@ namespace FieldWarning
                                                                   let transform = ubo.Projection * ubo.View * ubo.World
                                                                   select new VertexOutput
                                                                   {
-                                                                      Normal = input.Normal,
+                                                                      Normal = (input.Normal + new vec3(1, 1, 1)) / 2,
                                                                       Position = transform * new vec4(input.Position, 1)
                                                                   });
 

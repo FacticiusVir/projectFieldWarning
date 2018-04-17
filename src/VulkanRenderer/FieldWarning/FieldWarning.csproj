@@ -13,11 +13,24 @@
     <PackageReference Include="Serilog.Sinks.RollingFile" Version="3.3.0" />
     <PackageReference Include="Serilog.Sinks.Trace" Version="2.1.0" />
     <PackageReference Include="SharpVk.Shanq.GlmSharp" Version="0.4.1" />
-    <PackageReference Include="Tectonic" Version="0.1.0-dev0199" />
+    <PackageReference Include="Tectonic" Version="0.1.0-dev0205" />
   </ItemGroup>
   <ItemGroup>
-    <Content Update="C:\Users\Facti\.nuget\packages\tectonic\0.1.0-dev0199\contentFiles\any\netstandard2.0\glfw3.dll">
+    <Compile Update="LifecycleService.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Compile>
+    <Compile Update="LifecycleService.cs">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Update="C:\Users\facti_000\.nuget\packages\tectonic\0.1.0-dev0197\contentFiles\any\netstandard2.0\glfw3.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="glfw3.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>
