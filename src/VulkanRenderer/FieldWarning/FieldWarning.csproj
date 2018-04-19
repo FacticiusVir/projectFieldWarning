@@ -8,12 +8,20 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="tank2.obj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="tank2.obj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Serilog" Version="2.6.0" />
     <PackageReference Include="Serilog.Extensions.Logging" Version="2.0.2" />
     <PackageReference Include="Serilog.Sinks.RollingFile" Version="3.3.0" />
     <PackageReference Include="Serilog.Sinks.Trace" Version="2.1.0" />
-    <PackageReference Include="SharpVk.Shanq.GlmSharp" Version="0.4.1" />
-    <PackageReference Include="Tectonic" Version="0.1.0-dev0205" />
+    <PackageReference Include="SharpVk.Shanq.GlmSharp" Version="0.4.3-dev2" />
+    <PackageReference Include="Tectonic" Version="0.1.0-dev0220" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="LifecycleService.cs">
