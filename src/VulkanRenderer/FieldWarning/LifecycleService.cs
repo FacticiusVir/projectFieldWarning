@@ -1,4 +1,5 @@
-﻿using GlmSharp;
+﻿using FileFormatWavefront;
+using GlmSharp;
 using SharpVk.Shanq;
 using SharpVk.Shanq.GlmSharp;
 using System;
@@ -44,56 +45,35 @@ namespace FieldWarning
 
             //var tankFile = File.ReadAllLines("./tank2.obj");
 
-            //var vertexPositions = new List<vec3>();
-
-            //var vertexNormals = new List<vec3>();
+            //var group = tankFile.Model.Groups.First();
 
             //var vertices = new List<Vertex>();
 
-            //var vertexLookup = new Dictionary<string, uint>();
+            //var vertexLookup = new Dictionary<(int, int), uint>();
 
             //var indices = new List<uint>();
 
-            //void AddIndex(string part)
+            //void AddIndex((int PositionIndex, int NormalIndex) faceVertex)
             //{
-            //    if (!vertexLookup.TryGetValue(part, out uint index))
+            //    if (!vertexLookup.TryGetValue(faceVertex, out uint index))
             //    {
             //        index = (uint)vertices.Count;
 
-            //        var subParts = part.Split('/');
+            //        var position = tankFile.Model.Vertices[faceVertex.PositionIndex];
 
-            //        int positionIndex = int.Parse(subParts[0]) - 1;
-            //        int normalIndex = int.Parse(subParts[1]) - 1;
+            //        var normal = tankFile.Model.Normals[faceVertex.NormalIndex];
 
-            //        vertices.Add(new Vertex(vertexPositions[positionIndex], vertexNormals[normalIndex]));
+            //        vertices.Add(new Vertex(new vec3(position.x / 100f, position.y / 100f, position.z / 100f), new vec3(normal.x, normal.y, normal.z)));
             //    }
 
             //    indices.Add(index);
             //}
 
-            //foreach (var line in tankFile)
+            //foreach (var face in group.Faces)
             //{
-            //    var parts = line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-
-            //    if (!parts.Any())
-            //    {
-            //        continue;
-            //    }
-
-            //    switch (parts[0])
-            //    {
-            //        case "v":
-            //            vertexPositions.Add(new vec3(float.Parse(parts[1]) / 100f, float.Parse(parts[2]) / 100f, float.Parse(parts[3]) / 100f));
-            //            break;
-            //        case "vn":
-            //            vertexNormals.Add(new vec3(float.Parse(parts[1]), float.Parse(parts[2]), float.Parse(parts[3])));
-            //            break;
-            //        case "f":
-            //            AddIndex(parts[1]);
-            //            AddIndex(parts[2]);
-            //            AddIndex(parts[3]);
-            //            break;
-            //    }
+            //    AddIndex((face.Indices[0].vertex, face.Indices[0].normal.Value));
+            //    AddIndex((face.Indices[1].vertex, face.Indices[1].normal.Value));
+            //    AddIndex((face.Indices[2].vertex, face.Indices[2].normal.Value));
             //}
 
             var boxModel = glTFLoader.Interface.LoadModel(".\\data\\models\\DamagedHelmet\\glTF-Embedded\\DamagedHelmet.gltf");

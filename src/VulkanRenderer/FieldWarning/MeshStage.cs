@@ -54,19 +54,23 @@ namespace FieldWarning
 
         public override IRenderStageState Initialise(Device device, VulkanBufferManager bufferManager, IHandleCreator handleCreator)
         {
+            vec3.Ones.Length.ToString();
+
             var vertexShader = device.CreateVertexModule(shanq => from input in shanq.GetInput<Vertex>()
                                                                   from ubo in shanq.GetBinding<UniformState>(0)
                                                                   let transform = ubo.Projection * ubo.View * ubo.World
+                                                                  let normal4 = ubo.InverseTransposeWorldView * new vec4(input.Normal, 1)
                                                                   select new VertexOutput
                                                                   {
-                                                                      Normal = (input.Normal + new vec3(1, 1, 1)) / 2,
+                                                                      Normal = new vec3(normal4.x, normal4.y, normal4.z) / normal4.w,
                                                                       Position = transform * new vec4(input.Position, 1)
                                                                   });
 
             var fragmentShader = device.CreateFragmentModule(shanq => from input in shanq.GetInput<FragmentInput>()
+                                                                      let brightness = input.Normal.y
                                                                       select new FragmentOutput
                                                                       {
-                                                                          Colour = new vec4(input.Normal, 1)
+                                                                          Colour = new vec4(brightness, brightness, brightness, 1)
                                                                       });
 
             var stateBuffer = bufferManager.CreateBuffer<UniformState>(1, BufferUsageFlags.TransferDestination | BufferUsageFlags.UniformBuffer, MemoryPropertyFlags.DeviceLocal);
@@ -119,11 +123,15 @@ namespace FieldWarning
 
             rotation /= 1000f;
 
+            var world = mat4.Rotate(rotation, vec3.UnitY);
+            var view = mat4.LookAt(new vec3(0, 10, -15), vec3.Zero, vec3.UnitY);
+
             var uniformState = new UniformState
             {
-                World = mat4.Rotate(rotation, vec3.UnitY),// * mat4.RotateZ(rotation / 4),
-                View = mat4.LookAt(new vec3(0, 5, -10), vec3.Zero, vec3.UnitY),
-                Projection = mat4.Perspective((float)Math.PI / 4f, 1.25f, 0.1f, 100)
+                World = world,
+                View = view,
+                Projection = mat4.Perspective((float)Math.PI / 4f, 1.25f, 0.1f, 100),
+                InverseTransposeWorldView = (world * view).Inverse.Transposed
             };
 
             uniformState.Projection[1, 1] *= -1;
@@ -144,6 +152,8 @@ namespace FieldWarning
             {
                 return null;
             }
+
+            this.UpdateState(stageState.StateBuffer);
 
             var pipeline = stageState.Device.CreateGraphicsPipeline(null,
                                                                     new[]
