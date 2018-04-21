@@ -8,7 +8,99 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="data\models\Box\glTF-Embedded\Box.gltf" />
+    <None Remove="data\models\DamagedHelmet\glTF-Embedded\DamagedHelmet.gltf" />
+    <None Remove="data\shaders\filtercube.vert" />
+    <None Remove="data\shaders\filtercube.vert.spv" />
+    <None Remove="data\shaders\genbrdflut.frag" />
+    <None Remove="data\shaders\genbrdflut.frag.spv" />
+    <None Remove="data\shaders\genbrdflut.vert" />
+    <None Remove="data\shaders\genbrdflut.vert.spv" />
+    <None Remove="data\shaders\irradiancecube.frag" />
+    <None Remove="data\shaders\irradiancecube.frag.spv" />
+    <None Remove="data\shaders\pbr.frag" />
+    <None Remove="data\shaders\pbr.frag.spv" />
+    <None Remove="data\shaders\pbr.vert" />
+    <None Remove="data\shaders\pbr.vert.spv" />
+    <None Remove="data\shaders\prefilterenvmap.frag" />
+    <None Remove="data\shaders\prefilterenvmap.frag.spv" />
+    <None Remove="data\shaders\skybox.frag" />
+    <None Remove="data\shaders\skybox.frag.spv" />
+    <None Remove="data\shaders\skybox.vert" />
+    <None Remove="data\shaders\skybox.vert.spv" />
+    <None Remove="data\textures\empty.ktx" />
+    <None Remove="data\textures\papermill_hdr16f_cube.ktx" />
     <None Remove="tank2.obj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="data\shaders\filtercube.vert">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\shaders\filtercube.vert.spv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\shaders\genbrdflut.frag">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\shaders\genbrdflut.frag.spv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\shaders\genbrdflut.vert">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\shaders\genbrdflut.vert.spv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\shaders\irradiancecube.frag">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\shaders\irradiancecube.frag.spv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\shaders\pbr.frag">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\shaders\pbr.frag.spv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\shaders\pbr.vert">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\shaders\pbr.vert.spv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\shaders\prefilterenvmap.frag">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\shaders\prefilterenvmap.frag.spv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\shaders\skybox.frag">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\shaders\skybox.frag.spv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\shaders\skybox.vert">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\shaders\skybox.vert.spv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\textures\empty.ktx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\textures\papermill_hdr16f_cube.ktx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="data\models\Box\glTF-Embedded\Box.gltf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="data\models\DamagedHelmet\glTF-Embedded\DamagedHelmet.gltf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Content Include="tank2.obj">
@@ -16,12 +108,18 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="glTF2Loader" Version="1.1.1-alpha" />
     <PackageReference Include="Serilog" Version="2.6.0" />
     <PackageReference Include="Serilog.Extensions.Logging" Version="2.0.2" />
     <PackageReference Include="Serilog.Sinks.RollingFile" Version="3.3.0" />
     <PackageReference Include="Serilog.Sinks.Trace" Version="2.1.0" />
     <PackageReference Include="SharpVk.Shanq.GlmSharp" Version="0.4.3-dev2" />
-    <PackageReference Include="Tectonic" Version="0.1.0-dev0220" />
+    <PackageReference Include="Tectonic" Version="0.1.0-dev0235" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Tectonic">
+      <HintPath>..\..\..\..\Tectonic\src\Tectonic\bin\Debug\netstandard2.0\Tectonic.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Update="LifecycleService.cs">

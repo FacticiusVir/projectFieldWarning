@@ -44,7 +44,7 @@ namespace FieldWarning
 
         private readonly uint[] indices = { 0, 1, 2, 2, 3, 0 };
 
-        public override IRenderStageState Initialise(Device device, VulkanBufferManager bufferManager)
+        public override IRenderStageState Initialise(Device device, VulkanBufferManager bufferManager, IHandleCreator handleCreator)
         {
             var mesh = StaticMeshHandle.Create(bufferManager, VectorTypeLibrary.Instance, this.vertices, this.indices);
 

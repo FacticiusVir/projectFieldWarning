@@ -52,7 +52,7 @@ namespace FieldWarning
 
         public IMeshHandle Mesh { get; set; }
 
-        public override IRenderStageState Initialise(Device device, VulkanBufferManager bufferManager)
+        public override IRenderStageState Initialise(Device device, VulkanBufferManager bufferManager, IHandleCreator handleCreator)
         {
             var vertexShader = device.CreateVertexModule(shanq => from input in shanq.GetInput<Vertex>()
                                                                   from ubo in shanq.GetBinding<UniformState>(0)
@@ -83,7 +83,7 @@ namespace FieldWarning
                 StageFlags = ShaderStageFlags.AllGraphics
             });
 
-            var descriptorSet = device.AllocateDescriptorSet(descriptorPool, descriptorSetLayout);
+            var descriptorSet = descriptorPool.AllocateDescriptorSet(descriptorSetLayout);
 
             descriptorSet.WriteDescriptorSet(0, 0, DescriptorType.UniformBuffer, new DescriptorBufferInfo
             {

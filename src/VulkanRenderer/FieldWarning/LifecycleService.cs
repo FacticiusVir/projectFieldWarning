@@ -35,66 +35,70 @@ namespace FieldWarning
 
             var meshStage = new MeshStage();
 
+            var pbrStage = new PbrStage();
+
             this.renderMap = this.vulkan.CreateSimpleRenderMap((1440, 960),
                                                                 "Project Field Warning",
                                                                 new ClearStage { ClearColour = new vec4(0, 0, 0, 1) },
-                                                                meshStage);
+                                                                pbrStage);
 
-            var tankFile = File.ReadAllLines("./tank2.obj");
+            //var tankFile = File.ReadAllLines("./tank2.obj");
 
-            var vertexPositions = new List<vec3>();
+            //var vertexPositions = new List<vec3>();
 
-            var vertexNormals = new List<vec3>();
+            //var vertexNormals = new List<vec3>();
 
-            var vertices = new List<Vertex>();
+            //var vertices = new List<Vertex>();
 
-            var vertexLookup = new Dictionary<string, uint>();
+            //var vertexLookup = new Dictionary<string, uint>();
 
-            var indices = new List<uint>();
+            //var indices = new List<uint>();
 
-            void AddIndex(string part)
-            {
-                if (!vertexLookup.TryGetValue(part, out uint index))
-                {
-                    index = (uint)vertices.Count;
+            //void AddIndex(string part)
+            //{
+            //    if (!vertexLookup.TryGetValue(part, out uint index))
+            //    {
+            //        index = (uint)vertices.Count;
 
-                    var subParts = part.Split('/');
+            //        var subParts = part.Split('/');
 
-                    int positionIndex = int.Parse(subParts[0]) - 1;
-                    int normalIndex = int.Parse(subParts[1]) - 1;
+            //        int positionIndex = int.Parse(subParts[0]) - 1;
+            //        int normalIndex = int.Parse(subParts[1]) - 1;
 
-                    vertices.Add(new Vertex(vertexPositions[positionIndex], vertexNormals[normalIndex]));
-                }
+            //        vertices.Add(new Vertex(vertexPositions[positionIndex], vertexNormals[normalIndex]));
+            //    }
 
-                indices.Add(index);
-            }
+            //    indices.Add(index);
+            //}
 
-            foreach (var line in tankFile)
-            {
-                var parts = line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            //foreach (var line in tankFile)
+            //{
+            //    var parts = line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
-                if (!parts.Any())
-                {
-                    continue;
-                }
+            //    if (!parts.Any())
+            //    {
+            //        continue;
+            //    }
 
-                switch (parts[0])
-                {
-                    case "v":
-                        vertexPositions.Add(new vec3(float.Parse(parts[1]) / 100f, float.Parse(parts[2]) / 100f, float.Parse(parts[3]) / 100f));
-                        break;
-                    case "vn":
-                        vertexNormals.Add(new vec3(float.Parse(parts[1]), float.Parse(parts[2]), float.Parse(parts[3])));
-                        break;
-                    case "f":
-                        AddIndex(parts[1]);
-                        AddIndex(parts[2]);
-                        AddIndex(parts[3]);
-                        break;
-                }
-            }
+            //    switch (parts[0])
+            //    {
+            //        case "v":
+            //            vertexPositions.Add(new vec3(float.Parse(parts[1]) / 100f, float.Parse(parts[2]) / 100f, float.Parse(parts[3]) / 100f));
+            //            break;
+            //        case "vn":
+            //            vertexNormals.Add(new vec3(float.Parse(parts[1]), float.Parse(parts[2]), float.Parse(parts[3])));
+            //            break;
+            //        case "f":
+            //            AddIndex(parts[1]);
+            //            AddIndex(parts[2]);
+            //            AddIndex(parts[3]);
+            //            break;
+            //    }
+            //}
 
-            meshStage.Mesh = this.renderMap.CreateStaticMesh<Vertex>(VectorTypeLibrary.Instance, vertices.ToArray(), indices.ToArray());
+            var boxModel = glTFLoader.Interface.LoadModel(".\\data\\models\\DamagedHelmet\\glTF-Embedded\\DamagedHelmet.gltf");
+
+            pbrStage.Mesh = this.renderMap.CreateStaticMesh<Vertex>(VectorTypeLibrary.Instance, vertices.ToArray(), indices.ToArray());
         }
 
         public override void Stop()
@@ -106,15 +110,7 @@ namespace FieldWarning
         {
             if (this.renderMap.Endpoints.Any(x => x.ShouldClose))
             {
-                try
-                {
-                    //HACK Fix this is Tectonic
-                    this.renderMap.Close();
-                }
-                catch
-                {
-
-                }
+                this.renderMap.Close();
 
                 this.renderMap = null;
 
