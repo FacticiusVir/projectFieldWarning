@@ -34,9 +34,7 @@ namespace FieldWarning
         public override void Start()
         {
             this.updateLoop.Register(this, UpdateStage.Update);
-
-            var meshStage = new MeshStage();
-
+            
             var pbrStage = new PbrStage();
 
             this.renderMap = this.vulkan.CreateSimpleRenderMap((1440, 960),
@@ -44,42 +42,9 @@ namespace FieldWarning
                                                                 new ClearStage { ClearColour = new vec4(0, 0, 0, 1) },
                                                                 pbrStage);
 
-            //var tankFile = File.ReadAllLines("./tank2.obj");
+            var model = glTFLoader.Interface.LoadModel(".\\data\\models\\DamagedHelmet\\glTF-Embedded\\DamagedHelmet.gltf");
 
-            //var group = tankFile.Model.Groups.First();
-
-            //var vertices = new List<Vertex>();
-
-            //var vertexLookup = new Dictionary<(int, int), uint>();
-
-            //var indices = new List<uint>();
-
-            //void AddIndex((int PositionIndex, int NormalIndex) faceVertex)
-            //{
-            //    if (!vertexLookup.TryGetValue(faceVertex, out uint index))
-            //    {
-            //        index = (uint)vertices.Count;
-
-            //        var position = tankFile.Model.Vertices[faceVertex.PositionIndex];
-
-            //        var normal = tankFile.Model.Normals[faceVertex.NormalIndex];
-
-            //        vertices.Add(new Vertex(new vec3(position.x / 100f, position.y / 100f, position.z / 100f), new vec3(normal.x, normal.y, normal.z)));
-            //    }
-
-            //    indices.Add(index);
-            //}
-
-            //foreach (var face in group.Faces)
-            //{
-            //    AddIndex((face.Indices[0].vertex, face.Indices[0].normal.Value));
-            //    AddIndex((face.Indices[1].vertex, face.Indices[1].normal.Value));
-            //    AddIndex((face.Indices[2].vertex, face.Indices[2].normal.Value));
-            //}
-
-            var boxModel = glTFLoader.Interface.LoadModel(".\\data\\models\\DamagedHelmet\\glTF-Embedded\\DamagedHelmet.gltf");
-
-            var dataBuffers = boxModel.Buffers.Select(LoadBufferData).ToArray();
+            var dataBuffers = model.Buffers.Select(LoadBufferData).ToArray();
 
             pbrStage.Mesh = this.renderMap.CreateStaticMesh<Vertex>(VectorTypeLibrary.Instance, vertices.ToArray(), indices.ToArray());
         }

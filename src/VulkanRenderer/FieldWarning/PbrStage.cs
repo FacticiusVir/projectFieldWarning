@@ -200,7 +200,11 @@ namespace FieldWarning
                                                                             Name = "main"
                                                                         }
                                                                     },
-                                                                    stageState.Mesh.PipelineVertexInputState,
+                                                                    new PipelineVertexInputStateCreateInfo
+                                                                    {
+                                                                        VertexBindingDescriptions = new[] { stageState.Mesh.GetBindingDescription(0) },
+                                                                        VertexAttributeDescriptions = stageState.Mesh.GetAttributeDescriptions(0, 0)
+                                                                    },
                                                                     new PipelineInputAssemblyStateCreateInfo { Topology = PrimitiveTopology.TriangleList },
                                                                     new PipelineRasterizationStateCreateInfo
                                                                     {
