@@ -40,7 +40,7 @@ namespace FieldWarning
             public ShaderModule FragmentShader;
             public PipelineLayout PipelineLayout;
             public DescriptorPool DescriptorPool;
-            public DescriptorSetLayout DescriptorSetLayout;
+            public DescriptorSetLayout[] DescriptorSetLayouts;
             public IMeshHandle SkyboxMesh;
 
             public IMeshHandle Mesh;
@@ -54,7 +54,10 @@ namespace FieldWarning
 
                 this.PipelineLayout?.Dispose();
 
-                this.DescriptorSetLayout?.Dispose();
+                foreach (var layout in this.DescriptorSetLayouts)
+                {
+                    layout.Dispose();
+                }
 
                 this.DescriptorPool?.Dispose();
 
@@ -69,22 +72,96 @@ namespace FieldWarning
             var vertexShader = LoadShaderModule(device, ".\\data\\shaders\\pbr.vert.spv");
             var fragmentShader = LoadShaderModule(device, ".\\data\\shaders\\pbr.frag.spv");
 
-            var descriptorPool = device.CreateDescriptorPool(1, new DescriptorPoolSize(DescriptorType.UniformBuffer, 1));
+            var descriptorPool = device.CreateDescriptorPool(2, new[] { new DescriptorPoolSize(DescriptorType.UniformBuffer, 2), new DescriptorPoolSize(DescriptorType.CombinedImageSampler, 7) });
 
-            var descriptorSetLayout = device.CreateDescriptorSetLayout(new DescriptorSetLayoutBinding
-            {
-                Binding = 0,
-                DescriptorCount = 1,
-                DescriptorType = DescriptorType.UniformBuffer,
-                StageFlags = ShaderStageFlags.AllGraphics
-            });
+            var sceneDescriptorSetLayout = device.CreateDescriptorSetLayout(
+                new[]
+                {
+                    new DescriptorSetLayoutBinding
+                    {
+                        Binding = 0,
+                        DescriptorCount = 1,
+                        DescriptorType = DescriptorType.UniformBuffer,
+                        StageFlags = ShaderStageFlags.Vertex | ShaderStageFlags.Fragment
+                    },
+                    new DescriptorSetLayoutBinding
+                    {
+                        Binding = 1,
+                        DescriptorCount = 1,
+                        DescriptorType = DescriptorType.UniformBuffer,
+                        StageFlags = ShaderStageFlags.Fragment
+                    },
+                    new DescriptorSetLayoutBinding
+                    {
+                        Binding = 2,
+                        DescriptorCount = 1,
+                        DescriptorType = DescriptorType.CombinedImageSampler,
+                        StageFlags = ShaderStageFlags.Fragment
+                    },
+                    new DescriptorSetLayoutBinding
+                    {
+                        Binding = 3,
+                        DescriptorCount = 1,
+                        DescriptorType = DescriptorType.CombinedImageSampler,
+                        StageFlags = ShaderStageFlags.Fragment
+                    },
+                    new DescriptorSetLayoutBinding
+                    {
+                        Binding = 4,
+                        DescriptorCount = 1,
+                        DescriptorType = DescriptorType.CombinedImageSampler,
+                        StageFlags = ShaderStageFlags.Fragment
+                    }
+                });
 
-            var pipelineLayout = device.CreatePipelineLayout(descriptorSetLayout, new PushConstantRange
-            {
-                Offset = 0,
-                Size = (uint)System.Runtime.InteropServices.Marshal.SizeOf<PushConstBlockMaterial>(),
-                StageFlags = ShaderStageFlags.AllGraphics
-            });
+            var materialDescriptorSetLayout = device.CreateDescriptorSetLayout(
+                new[]
+                {
+                    new DescriptorSetLayoutBinding
+                    {
+                        Binding = 0,
+                        DescriptorCount = 1,
+                        DescriptorType = DescriptorType.CombinedImageSampler,
+                        StageFlags = ShaderStageFlags.Fragment
+                    },
+                    new DescriptorSetLayoutBinding
+                    {
+                        Binding = 1,
+                        DescriptorCount = 1,
+                        DescriptorType = DescriptorType.CombinedImageSampler,
+                        StageFlags = ShaderStageFlags.Fragment
+                    },
+                    new DescriptorSetLayoutBinding
+                    {
+                        Binding = 2,
+                        DescriptorCount = 1,
+                        DescriptorType = DescriptorType.CombinedImageSampler,
+                        StageFlags = ShaderStageFlags.Fragment
+                    },
+                    new DescriptorSetLayoutBinding
+                    {
+                        Binding = 3,
+                        DescriptorCount = 1,
+                        DescriptorType = DescriptorType.CombinedImageSampler,
+                        StageFlags = ShaderStageFlags.Fragment
+                    },
+                    new DescriptorSetLayoutBinding
+                    {
+                        Binding = 4,
+                        DescriptorCount = 1,
+                        DescriptorType = DescriptorType.CombinedImageSampler,
+                        StageFlags = ShaderStageFlags.Fragment
+                    }
+                });
+
+            var pipelineLayout = device.CreatePipelineLayout(
+                new[] { sceneDescriptorSetLayout, materialDescriptorSetLayout },
+                new PushConstantRange
+                {
+                    Offset = 0,
+                    Size = (uint)System.Runtime.InteropServices.Marshal.SizeOf<PushConstBlockMaterial>(),
+                    StageFlags = ShaderStageFlags.AllGraphics
+                });
 
             return new PbrState
             {
@@ -92,7 +169,7 @@ namespace FieldWarning
                 VertexShader = vertexShader,
                 FragmentShader = fragmentShader,
                 DescriptorPool = descriptorPool,
-                DescriptorSetLayout = descriptorSetLayout,
+                DescriptorSetLayouts = new[] { sceneDescriptorSetLayout, materialDescriptorSetLayout },
                 PipelineLayout = pipelineLayout,
                 Mesh = this.Mesh
             };

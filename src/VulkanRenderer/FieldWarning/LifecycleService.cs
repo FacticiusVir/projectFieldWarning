@@ -1,5 +1,6 @@
 ﻿using FileFormatWavefront;
 using GlmSharp;
+using glTFLoader.Schema;
 using SharpVk.Shanq;
 using SharpVk.Shanq.GlmSharp;
 using System;
@@ -78,7 +79,14 @@ namespace FieldWarning
 
             var boxModel = glTFLoader.Interface.LoadModel(".\\data\\models\\DamagedHelmet\\glTF-Embedded\\DamagedHelmet.gltf");
 
+            var dataBuffers = boxModel.Buffers.Select(LoadBufferData).ToArray();
+
             pbrStage.Mesh = this.renderMap.CreateStaticMesh<Vertex>(VectorTypeLibrary.Instance, vertices.ToArray(), indices.ToArray());
+        }
+
+        private static byte[] LoadBufferData(glTFLoader.Schema.Buffer gltfBuffer)
+        {
+            return Convert.FromBase64String(gltfBuffer.Uri.Substring(37));
         }
 
         public override void Stop()
@@ -127,6 +135,7 @@ namespace FieldWarning
             {
                 this.Position = position;
                 this.Normal = normal;
+                this.Uv = vec2.Zero;
             }
 
             [Location(0)]
@@ -134,6 +143,9 @@ namespace FieldWarning
 
             [Location(1)]
             public vec3 Normal;
+
+            [Location(2)]
+            public vec2 Uv;
         }
     }
 }
