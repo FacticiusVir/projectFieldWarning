@@ -1,6 +1,7 @@
 ﻿using FileFormatWavefront;
 using GlmSharp;
 using glTFLoader.Schema;
+using SharpVk;
 using SharpVk.Shanq;
 using SharpVk.Shanq.GlmSharp;
 using System;
@@ -34,7 +35,7 @@ namespace FieldWarning
         public override void Start()
         {
             this.updateLoop.Register(this, UpdateStage.Update);
-            
+
             var pbrStage = new PbrStage();
 
             this.renderMap = this.vulkan.CreateSimpleRenderMap((1440, 960),
@@ -46,7 +47,121 @@ namespace FieldWarning
 
             var dataBuffers = model.Buffers.Select(LoadBufferData).ToArray();
 
-            pbrStage.Mesh = this.renderMap.CreateStaticMesh<Vertex>(VectorTypeLibrary.Instance, vertices.ToArray(), indices.ToArray());
+            var modelMesh = model.Meshes[0];
+
+            var attributeAccessors = modelMesh.Primitives[0].Attributes.OrderBy(x => x.Value).Select(x => model.Accessors[x.Value]).ToArray();
+
+            int count = attributeAccessors.First().Count;
+
+            int attributeOffset = 0;
+
+            var accessorInfo = attributeAccessors.Select(x =>
+            {
+                var bufferView = model.BufferViews[x.BufferView.Value];
+                var buffer = dataBuffers[bufferView.Buffer];
+                int attributeStride = GetStride(x);
+
+                var result = (Stride: bufferView.ByteStride ?? attributeStride, Buffer: buffer, BufferOffset: bufferView.ByteOffset, AttributeOffset: attributeOffset, Format: GetFormat(x));
+
+                attributeOffset += attributeStride;
+
+                return result;
+            }).ToArray();
+
+            int vertexStride = attributeAccessors.Sum(GetStride);
+
+            var vertices = new byte[vertexStride * count];
+
+            int vertexPointer = 0;
+
+            for (int index = 0; index < count; index++)
+            {
+                int offset = 0;
+
+                for (int accessorIndex = 0; accessorIndex < attributeAccessors.Length; accessorIndex++)
+                {
+                    var info = accessorInfo[accessorIndex];
+
+                    Array.ConstrainedCopy(info.Buffer, info.BufferOffset + (index * info.Stride), vertices, vertexPointer + offset, info.Stride);
+
+                    offset += info.Stride;
+                }
+
+                vertexPointer += vertexStride;
+            }
+
+            pbrStage.Mesh = this.renderMap.CreateStaticMesh((uint)vertexStride, accessorInfo.Select(x => ((uint)x.AttributeOffset, x.Format)).ToArray(), vertices, this.indices);
+        }
+
+        private static Format GetFormat(Accessor accessor)
+        {
+            if (accessor.ComponentType != Accessor.ComponentTypeEnum.FLOAT)
+            {
+                throw new NotSupportedException();
+            }
+
+            switch (accessor.Type)
+            {
+                case Accessor.TypeEnum.SCALAR:
+                    return Format.R32SFloat;
+                case Accessor.TypeEnum.VEC2:
+                    return Format.R32G32SFloat;
+                case Accessor.TypeEnum.VEC3:
+                    return Format.R32G32B32SFloat;
+                case Accessor.TypeEnum.VEC4:
+                    return Format.R32G32B32A32SFloat;
+                default:
+                    throw new NotSupportedException();
+            }
+        }
+
+        private static int GetStride(Accessor accessor)
+        {
+            int stride;
+
+            switch (accessor.ComponentType)
+            {
+                case Accessor.ComponentTypeEnum.BYTE:
+                case Accessor.ComponentTypeEnum.UNSIGNED_BYTE:
+                    stride = 1;
+                    break;
+                case Accessor.ComponentTypeEnum.SHORT:
+                case Accessor.ComponentTypeEnum.UNSIGNED_SHORT:
+                    stride = 2;
+                    break;
+                case Accessor.ComponentTypeEnum.UNSIGNED_INT:
+                case Accessor.ComponentTypeEnum.FLOAT:
+                    stride = 4;
+                    break;
+                default:
+                    throw new NotSupportedException();
+            }
+
+            switch (accessor.Type)
+            {
+                case Accessor.TypeEnum.SCALAR:
+                    break;
+                case Accessor.TypeEnum.VEC2:
+                    stride *= 2;
+                    break;
+                case Accessor.TypeEnum.VEC3:
+                    stride *= 3;
+                    break;
+                case Accessor.TypeEnum.VEC4:
+                case Accessor.TypeEnum.MAT2:
+                    stride *= 4;
+                    break;
+                case Accessor.TypeEnum.MAT3:
+                    stride *= 9;
+                    break;
+                case Accessor.TypeEnum.MAT4:
+                    stride *= 16;
+                    break;
+                default:
+                    throw new NotSupportedException();
+            }
+
+            return stride;
         }
 
         private static byte[] LoadBufferData(glTFLoader.Schema.Buffer gltfBuffer)

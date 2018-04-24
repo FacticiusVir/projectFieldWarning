@@ -115,7 +115,7 @@
     <PackageReference Include="Serilog.Sinks.RollingFile" Version="3.3.0" />
     <PackageReference Include="Serilog.Sinks.Trace" Version="2.1.0" />
     <PackageReference Include="SharpVk.Shanq.GlmSharp" Version="0.4.3-dev2" />
-    <PackageReference Include="Tectonic" Version="0.1.0-dev0243" />
+    <PackageReference Include="Tectonic" Version="0.1.0-dev0246" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Tectonic">
