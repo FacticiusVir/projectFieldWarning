@@ -62,15 +62,15 @@ namespace FieldWarning
                                                                   let normal4 = ubo.InverseTransposeWorldView * new vec4(input.Normal, 1)
                                                                   select new VertexOutput
                                                                   {
-                                                                      Normal = new vec3(normal4.x, normal4.y, normal4.z) / normal4.w,
+                                                                      Normal = input.Normal, //new vec3(normal4.x, normal4.y, normal4.z) / normal4.w,
                                                                       Position = transform * new vec4(input.Position, 1)
                                                                   });
 
             var fragmentShader = device.CreateFragmentModule(shanq => from input in shanq.GetInput<FragmentInput>()
-                                                                      let brightness = input.Normal.y
+                                                                      let brightness = 1f
                                                                       select new FragmentOutput
                                                                       {
-                                                                          Colour = new vec4(brightness, brightness, brightness, 1)
+                                                                          Colour = new vec4(input.Normal, 1)
                                                                       });
 
             var stateBuffer = bufferManager.CreateBuffer<UniformState>(1, BufferUsageFlags.TransferDestination | BufferUsageFlags.UniformBuffer, MemoryPropertyFlags.DeviceLocal);
@@ -123,8 +123,8 @@ namespace FieldWarning
 
             rotation /= 1000f;
 
-            var world = mat4.Rotate(rotation, vec3.UnitY);
-            var view = mat4.LookAt(new vec3(0, 10, -15), vec3.Zero, vec3.UnitY);
+            var world = mat4.Rotate(rotation, vec3.UnitY) * mat4.Rotate((float)Math.PI / 2f, vec3.UnitX);
+            var view = mat4.LookAt(new vec3(0, 0, -5), vec3.Zero, vec3.UnitY);
 
             var uniformState = new UniformState
             {
@@ -181,7 +181,7 @@ namespace FieldWarning
                                                                     {
                                                                         PolygonMode = PolygonMode.Fill,
                                                                         LineWidth = 1,
-                                                                        CullMode = CullModeFlags.Back,
+                                                                        CullMode = CullModeFlags.None,
                                                                         FrontFace = FrontFace.CounterClockwise
                                                                     },
                                                                     stageState.PipelineLayout,
@@ -266,12 +266,13 @@ namespace FieldWarning
             public vec4 Colour;
         }
 
-        private struct Vertex
+        public struct Vertex
         {
             public Vertex(vec3 position, vec3 normal)
             {
                 this.Position = position;
                 this.Normal = normal;
+                this.Uv = vec2.Zero;
             }
 
             [Location(0)]
@@ -279,6 +280,9 @@ namespace FieldWarning
 
             [Location(1)]
             public vec3 Normal;
+
+            [Location(2)]
+            public vec2 Uv;
         }
     }
 }

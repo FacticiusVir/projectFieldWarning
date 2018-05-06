@@ -1,6 +1,7 @@
 ﻿using FileFormatWavefront;
 using GlmSharp;
 using glTFLoader.Schema;
+using Microsoft.Extensions.Logging;
 using SharpVk;
 using SharpVk.Shanq;
 using SharpVk.Shanq.GlmSharp;
@@ -17,14 +18,17 @@ namespace FieldWarning
     {
         private readonly IUpdateLoopService updateLoop;
         private readonly IVulkanService vulkan;
-
+        private readonly ILogger<LifecycleService> logger;
+        private readonly ILoggerFactory loggerFactory;
         private Game game;
         private VulkanRenderMap renderMap;
 
-        public LifecycleService(IUpdateLoopService updateLoop, IVulkanService vulkan)
+        public LifecycleService(IUpdateLoopService updateLoop, IVulkanService vulkan, ILogger<LifecycleService> logger, ILoggerFactory loggerFactory)
         {
             this.updateLoop = updateLoop;
             this.vulkan = vulkan;
+            this.logger = logger;
+            this.loggerFactory = loggerFactory;
         }
 
         public override void Initialise(Game game)
@@ -36,11 +40,11 @@ namespace FieldWarning
         {
             this.updateLoop.Register(this, UpdateStage.Update);
 
-            var pbrStage = new PbrStage();
+            var pbrStage = new PbrStage(this.loggerFactory.CreateLogger<PbrStage>());
 
             this.renderMap = this.vulkan.CreateSimpleRenderMap((1440, 960),
                                                                 "Project Field Warning",
-                                                                new ClearStage { ClearColour = new vec4(0, 0, 0, 1) },
+                                                                //new ClearStage { ClearColour = new vec4(0, 0, 0, 1) },
                                                                 pbrStage);
 
             var model = glTFLoader.Interface.LoadModel(".\\data\\models\\DamagedHelmet\\glTF-Embedded\\DamagedHelmet.gltf");
@@ -90,7 +94,16 @@ namespace FieldWarning
                 vertexPointer += vertexStride;
             }
 
-            pbrStage.Mesh = this.renderMap.CreateStaticMesh((uint)vertexStride, accessorInfo.Select(x => ((uint)x.AttributeOffset, x.Format)).ToArray(), vertices, this.indices);
+            var indices = new uint[model.Accessors[0].Count];
+
+            for (int index = 0; index < model.Accessors[0].Count; index++)
+            {
+                indices[index] = (uint)BitConverter.ToUInt16(dataBuffers[0], model.Accessors[0].ByteOffset + index * sizeof(ushort));
+            }
+
+            pbrStage.Mesh = this.renderMap.CreateStaticMesh((uint)vertexStride, accessorInfo.Select(x => ((uint)x.AttributeOffset, x.Format)).ToArray(), vertices, indices);
+
+            //pbrStage.Mesh = this.renderMap.CreateStaticMesh(VectorTypeLibrary.Instance, this.vertices, this.indices);
         }
 
         private static Format GetFormat(Accessor accessor)

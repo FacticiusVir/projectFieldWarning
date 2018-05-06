@@ -21,8 +21,9 @@ namespace FieldWarning
             Game.Run(services =>
                 {
                     services.AddLogging(loggingBuilder => loggingBuilder.AddSerilog(dispose: true))
-                            .AddVulkan("Project Field Warning", (1, 0, 0), Error | Warning)
+                            .AddVulkan("Project Field Warning", (1, 0, 0), Error | Warning | PerformanceWarning)
                             .AddVulkanLayer("VK_LAYER_LUNARG_standard_validation", isOptional: true)
+                            .AddVulkanLayer("VK_LAYER_LUNARG_assistant_layer", isOptional: true)
                             .AddVulkanExtension(ExtExtensions.DebugReport, true)
                             .AddGlfwService()
                             .AddGameService<LifecycleService>();
